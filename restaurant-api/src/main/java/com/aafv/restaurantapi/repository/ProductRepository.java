@@ -11,7 +11,7 @@ import java.util.List;
 public interface ProductRepository extends JpaRepository<Product, Long> {
     Product findProductById(long id);
     boolean existsByNameIgnoreCase(String name);
-    List<Product> getProductsByCategoryAndAvailability(String category, String availability);
+    List<Product> getProductsByCategoryAndAvailable(String category, String availability);
 
     Product findProductByCategoryAndAvailable(ProductCategoryEnum category, Boolean available);
 }

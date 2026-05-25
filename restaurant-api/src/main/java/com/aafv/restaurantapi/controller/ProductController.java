@@ -45,7 +45,7 @@ public class ProductController {
         );
     }
 
-    @GetMapping("/{id]")
+    @GetMapping("/{id}")
     public ResponseEntity<GeneralResponse> getProductById(@PathVariable Long id) {
         ProductResponse productResponse = productService.getProductById(id);
         return buildResponse(

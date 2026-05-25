@@ -13,8 +13,9 @@ public class ProductMapper {
         return Product.builder()
                 .name(createProductRequest.getName())
                 .price(createProductRequest.getPrice())
-                .available(createProductRequest.getAvailable())
+                .available(createProductRequest.getQuantity() > 0)
                 .description(createProductRequest.getDescription())
+                .quantity(createProductRequest.getQuantity())
                 .category(createProductRequest.getCategory())
                 .build();
     }
@@ -32,6 +33,7 @@ public class ProductMapper {
 
     public ProductResponse toDto(Product product) {
         return ProductResponse.builder()
+                .id(product.getId())
                 .name(product.getName())
                 .description(product.getDescription())
                 .quantity(product.getQuantity())

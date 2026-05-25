@@ -31,6 +31,4 @@ public class CreateProductRequest {
     @PositiveOrZero(message = "Quantity cannot be negative")
     private Integer quantity;
 
-    @NotBlank
-    private Boolean available;
 }
