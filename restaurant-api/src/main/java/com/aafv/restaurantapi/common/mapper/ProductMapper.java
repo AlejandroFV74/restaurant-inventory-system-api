@@ -25,7 +25,6 @@ public class ProductMapper {
                 .name(updateProductRequest.getName())
                 .description(updateProductRequest.getDescription())
                 .quantity(updateProductRequest.getQuantity())
-                .available(updateProductRequest.getAvailable())
                 .price(updateProductRequest.getPrice())
                 .category(updateProductRequest.getCategory())
                 .build();

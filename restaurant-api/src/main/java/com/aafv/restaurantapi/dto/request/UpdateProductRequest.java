@@ -16,7 +16,6 @@ public class UpdateProductRequest {
     private String name;
     private String description;
     private BigDecimal price;
-    private Boolean available;
     private Integer quantity;
     private ProductCategoryEnum category;
 }

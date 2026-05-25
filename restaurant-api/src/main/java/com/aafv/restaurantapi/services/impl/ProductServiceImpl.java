@@ -4,7 +4,10 @@ import com.aafv.restaurantapi.common.mapper.ProductMapper;
 import com.aafv.restaurantapi.dto.request.CreateProductRequest;
 import com.aafv.restaurantapi.dto.request.UpdateProductRequest;
 import com.aafv.restaurantapi.dto.response.ProductResponse;
+import com.aafv.restaurantapi.exceptions.BusinessRuleException;
+import com.aafv.restaurantapi.exceptions.ResourceNotFoundException;
 import com.aafv.restaurantapi.model.Product;
+import com.aafv.restaurantapi.model.enums.ProductCategoryEnum;
 import com.aafv.restaurantapi.repository.ProductRepository;
 import com.aafv.restaurantapi.services.ProductService;
 import jakarta.transaction.Transactional;
@@ -16,14 +19,17 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class ProductServiceImpl extends ProductService {
+public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
 
     @Override
     @Transactional
     public ProductResponse createProduct(CreateProductRequest productRequest){
-        //validar nombre unico sin importar mayuscula o minuscula
+        if(productRepository.existsByNameIgnoreCase(productRequest.getName())){
+            throw new BusinessRuleException("A product with this name already exists");
+        }
+
         return productMapper.toDto(
                 productRepository.save(productMapper.toProductCreate(productRequest))
         );
@@ -42,14 +48,33 @@ public class ProductServiceImpl extends ProductService {
     public ProductResponse getProductById(long id){
         return productMapper.toDto(
                 productRepository.findById(id)
-                        .orElseThrow(() -> new ResourseNotFoundException("Product didn't match any search"))
+                        .orElseThrow(() -> new ResourceNotFoundException("Product didn't match any search"))
         );
+    }
+
+    @Override
+    public ProductResponse getProductsByCategoryAndAvailability(ProductCategoryEnum category, Boolean availability){
+        return productMapper.toDto(
+                productRepository.findProductByCategoryAndAvailable( category, availability)
+        );
+
+
     }
 
     @Override
     @Transactional
     public ProductResponse updateProduct(UpdateProductRequest productRequest, long id){
-        this.getProductById(id);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product didn't match any search"));
+        if(product.getQuantity() == 0){
+            product.setAvailable(false);
+        }
+        if(product.getQuantity() > 0){
+            product.setAvailable(true);
+        }
+        if(product.getQuantity() + productRequest.getQuantity() < 0){
+            throw new BusinessRuleException("Quantity cannot be less than 0");
+        }
         return productMapper.toDto(productRepository.save(productMapper.toProductUpdate(productRequest, id)));
 
     }
@@ -57,8 +82,14 @@ public class ProductServiceImpl extends ProductService {
     @Override
     @Transactional
     public ProductResponse deleteProduct(long id){
-        ProductResponse product = this.getProductById(id);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product didn't match any search"));
+                ;
+        if (product.getCategory() == ProductCategoryEnum.INGREDIENT && Boolean.TRUE.equals(product.getAvailable())){
+            throw new BusinessRuleException("Available ingredients cannot be deleted");
+
+        }
         productRepository.deleteById(id);
-        return product;
+        return productMapper.toDto(product);
     }
 }
