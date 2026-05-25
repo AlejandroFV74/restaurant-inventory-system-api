@@ -53,12 +53,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponse getProductsByCategoryAndAvailability(ProductCategoryEnum category, Boolean availability){
-        return productMapper.toDto(
-                productRepository.findProductByCategoryAndAvailable( category, availability)
-        );
-
-
+    public List<ProductResponse> getProductsByCategoryAndAvailability(
+            ProductCategoryEnum category,
+            Boolean available
+    ) {
+        return productRepository.findByCategoryAndAvailable(category, available)
+                .stream()
+                .map(productMapper::toDto)
+                .toList();
     }
 
     @Override
@@ -66,16 +68,17 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponse updateProduct(UpdateProductRequest productRequest, long id){
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product didn't match any search"));
-        if(product.getQuantity() == 0){
-            product.setAvailable(false);
+        if (productRequest.getQuantity() == null) {
+            throw new BusinessRuleException("Quantity is required");
         }
-        if(product.getQuantity() > 0){
-            product.setAvailable(true);
-        }
-        if(product.getQuantity() + productRequest.getQuantity() < 0){
+
+        if (productRequest.getQuantity() < 0) {
             throw new BusinessRuleException("Quantity cannot be less than 0");
         }
-        return productMapper.toDto(productRepository.save(productMapper.toProductUpdate(productRequest, id)));
+
+        Product updatedProduct = productMapper.toProductUpdate(productRequest, product);
+
+        return productMapper.toDto(productRepository.save(updatedProduct));
 
     }
 

@@ -20,15 +20,15 @@ public class ProductMapper {
                 .build();
     }
 
-    public Product toProductUpdate(UpdateProductRequest updateProductRequest, Long id) {
-        return Product.builder()
-                .id(id)
-                .name(updateProductRequest.getName())
-                .description(updateProductRequest.getDescription())
-                .quantity(updateProductRequest.getQuantity())
-                .price(updateProductRequest.getPrice())
-                .category(updateProductRequest.getCategory())
-                .build();
+    public Product toProductUpdate(UpdateProductRequest request, Product product) {
+                product.setName(request.getName());
+                product.setDescription(request.getDescription());
+                product.setPrice(request.getPrice());
+                product.setQuantity(request.getQuantity());
+                product.setCategory(request.getCategory());
+                product.setAvailable(request.getQuantity() > 0);
+
+        return product;
     }
 
     public ProductResponse toDto(Product product) {

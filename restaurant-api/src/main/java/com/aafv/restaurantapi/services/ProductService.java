@@ -14,5 +14,8 @@ public interface ProductService {
     ProductResponse getProductById(long id);
     ProductResponse updateProduct(UpdateProductRequest product, long id);
     ProductResponse deleteProduct(long id);
-    ProductResponse getProductsByCategoryAndAvailability(ProductCategoryEnum category, Boolean availability);
+    List<ProductResponse> getProductsByCategoryAndAvailability(
+            ProductCategoryEnum category,
+            Boolean available
+    );
 }

@@ -36,8 +36,19 @@ public class ProductController {
     }
 
     @GetMapping("")
-    public ResponseEntity<GeneralResponse> getAllProducts() {
-        List<ProductResponse> productResponse = productService.getAllProducts();
+    public ResponseEntity<GeneralResponse> getAllProducts(
+            @RequestParam(required = false) ProductCategoryEnum category,
+            @RequestParam(required = false) Boolean available
+    ) {
+        List<ProductResponse> productResponse;
+
+        if (category != null && available != null) {
+            productResponse = productService.getProductsByCategoryAndAvailability(category, available);
+        } else {
+            productResponse = productService.getAllProducts();
+        }
+
+
         return buildResponse(
                 "All products",
                 HttpStatus.OK,
@@ -57,7 +68,7 @@ public class ProductController {
 
     @GetMapping("{category}&{available}")
     public ResponseEntity<GeneralResponse> getProductByCategory(@PathVariable ProductCategoryEnum category, @PathVariable Boolean available) {
-        ProductResponse productResponse = productService.getProductsByCategoryAndAvailability(category, available);
+        List<ProductResponse> productResponse = productService.getProductsByCategoryAndAvailability(category, available);
         return buildResponse(
                 "Products identified:",
                 HttpStatus.OK,
